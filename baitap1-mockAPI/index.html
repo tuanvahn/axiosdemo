@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        #update{
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="content" style="width: 60%; margin: auto; box-shadow: 1px 0px 3px 1px #ccc; padding: 15px">
+            
+        <h3>QUẢN LÝ THÔNG TIN NGƯỜI DÙNG</h3>
+
+        <div id="editCommon">
+                <input type="hidden" id="id"> 
+                <input type="text" id="textName"> 
+                <input type="text" id="textEmail"> 
+                <button type="button" id="update" onclick="save()">Cập nhật</button>
+                <button type="button" id="add" onclick="create()">Thêm mới</button>
+        </div>
+            <table border="1" width="100%">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="contentTable">
+                   
+                </tbody>
+            </table>
+           
+    </div>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <script>
+        //Đổ dữ liệu lấy từ API
+var html ="";
+var editHtml ="";
+axios.get('http://5d6f4fd4482b530014d2e00c.mockapi.io/api/quanlyuser/users').then(resp => {
+
+    resp.data.map(x => {
+        html += `<tr>
+        <td>${x.id}</td>
+        <td>${x.username}</td>
+        <td>${x.email}</td>
+        <td>
+        <a href='javascript:void(0)' onclick='edit(${x.id})'>Sửa</a>
+        <a href='javascript:void(0)' onclick='xoa(${x.id})'>Xóa</a>
+        </td>
+        </tr>
+        `
+    });
+document.getElementById('contentTable').insertAdjacentHTML('beforeend', html);
+}).catch(ex => {
+    console.log("Lỗi lấy dữ liệu");
+});
+
+
+//Thực hiện lấy dữ liệu update
+function edit(id){
+    document.getElementById("add").style.display = "none";
+    document.getElementById("update").style.display = "inline-block";
+    axios.get('http://5d6f4fd4482b530014d2e00c.mockapi.io/api/quanlyuser/users/'+id).then(resp => {
+    document.getElementById("textName").value = `${resp.data.username}`;
+    document.getElementById("textEmail").value = `${resp.data.email}`;
+    document.getElementById("id").value = `${resp.data.id}`;
+console.log(editHtml);
+
+}).catch(ex => {
+console.log("Lỗi lấy dữ liệu");
+});
+}
+
+//Thực hiện lưu update
+function save(){
+    var name = document.getElementById("textName").value;
+    var email = document.getElementById("textEmail").value;
+    var id = document.getElementById("id").value;
+    axios.put(
+        'http://5d6f4fd4482b530014d2e00c.mockapi.io/api/quanlyuser/users/'+id,
+        {
+            username : name,
+            email : email
+        },
+        { headers: {'Content-Type': 'application/json'}}
+    
+    ).then(rs => {
+        alert("Cập nhật thành công");
+        setTimeout(location.reload(), 3000);
+    }).catch( ex => {
+        alert("Lỗi update");
+    })
+}
+//Thực hiện tạo mới đối tượng
+function create(){
+    var name = document.getElementById("textName").value;
+    var email = document.getElementById("textEmail").value;
+    axios.post(
+        'http://5d6f4fd4482b530014d2e00c.mockapi.io/api/quanlyuser/users/',
+        {
+            username : name,
+            email : email
+        },
+        { headers: {'Content-Type': 'application/json'}}
+    
+    ).then(rs => {
+        alert("Thêm mới thành công");
+        setTimeout(location.reload(), 3000);
+    }).catch(ex => {
+        alert("Không thể thêm mới");
+    })
+}
+
+function xoa(id){
+    axios.delete('http://5d6f4fd4482b530014d2e00c.mockapi.io/api/quanlyuser/users/'+id).then(resp => {
+        alert("Xóa thành công");
+        setTimeout(location.reload(), 3000);
+}).catch(ex => {
+console.log("Lỗi xóa dữ liệu");
+});
+}
+    </script>
+</body>
+</html>
